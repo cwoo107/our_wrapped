@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cassandra's 2025 Reading Wrapped</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Karla:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2EC4B6;
+            --secondary: #6A4C93;
+            --accent: #FDC500;
+            --dark: #1A1A2E;
+            --light: #F8F4E3;
+            --pink: #FF6B9D;
+            --teal: #2EC4B6;
+        }
+
+        body {
+            font-family: 'Karla', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+        }
+
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            position: relative;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(46, 196, 182, 0.15), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(106, 76, 147, 0.15), transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        .slide-content {
+            max-width: 900px;
+            z-index: 10;
+            position: relative;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            line-height: 0.9;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--teal), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 60px rgba(46, 196, 182, 0.3);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--teal);
+        }
+
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--light);
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .big-number {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(5rem, 15vw, 12rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--teal), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            display: inline-block;
+            margin: 1rem 0;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 20px rgba(46, 196, 182, 0.5));
+            }
+            to {
+                filter: drop-shadow(0 0 40px rgba(46, 196, 182, 0.8));
+            }
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(46, 196, 182, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-desc {
+            font-size: 1rem;
+            color: var(--light);
+            opacity: 0.7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--teal), var(--secondary));
+            border-radius: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            margin: 0.5rem;
+            box-shadow: 0 5px 15px rgba(46, 196, 182, 0.4);
+        }
+
+        .personality-badge {
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+            margin: 1rem 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+            margin: 2rem 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            animation: fadeInLeft 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-year {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 150px;
+        }
+
+        .timeline-bar {
+            flex: 1;
+            height: 40px;
+            background: linear-gradient(90deg, var(--teal), var(--secondary));
+            border-radius: 20px;
+            margin: 0 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .timeline-count {
+            font-size: 1.2rem;
+            font-weight: 700;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        .quote {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-style: italic;
+            line-height: 1.6;
+            color: var(--accent);
+            padding: 2rem;
+            border-left: 5px solid var(--teal);
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .rating-bars {
+            margin: 2rem 0;
+        }
+
+        .rating-bar-item {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .rating-label {
+            min-width: 120px;
+            font-weight: 700;
+        }
+
+        .rating-visual {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 0 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--teal), var(--secondary));
+            border-radius: 15px;
+            transition: width 0.8s ease-out;
+        }
+
+        .rating-count {
+            min-width: 40px;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline-year {
+                font-size: 1.2rem;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Slide 1: Title -->
+        <div class="slide">
+            <div class="slide-content" style="text-align: center;">
+                <h1>CASSANDRA'S<br>2025<br>READING<br>WRAPPED</h1>
+                <p class="subtitle">Your year in books, reimagined</p>
+                <div class="scroll-hint">↓ Scroll to explore</div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Overview -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Your Year in Books</h2>
+                <div class="big-number">20</div>
+                <h3>Books Read</h3>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Average Rating</div>
+                        <div class="stat-value">4.32 ⭐</div>
+                        <div class="stat-desc">Consistently great picks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Five-Star Books</div>
+                        <div class="stat-value">47%</div>
+                        <div class="stat-desc">Nearly half were perfect</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Four Stars or Better</div>
+                        <div class="stat-value">84%</div>
+                        <div class="stat-desc">Most were excellent</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Rating Distribution -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>How You Rated</h2>
+                <p class="subtitle">Your rating breakdown</p>
+                
+                <div class="rating-bars">
+                    <div class="rating-bar-item">
+                        <div class="rating-label">⭐⭐⭐⭐⭐ Five Stars</div>
+                        <div class="rating-visual">
+                            <div class="rating-fill" style="width: 100%;"></div>
+                        </div>
+                        <div class="rating-count">9</div>
+                    </div>
+                    <div class="rating-bar-item">
+                        <div class="rating-label">⭐⭐⭐⭐ Four Stars</div>
+                        <div class="rating-visual">
+                            <div class="rating-fill" style="width: 78%;"></div>
+                        </div>
+                        <div class="rating-count">7</div>
+                    </div>
+                    <div class="rating-bar-item">
+                        <div class="rating-label">⭐⭐⭐ Three Stars</div>
+                        <div class="rating-visual">
+                            <div class="rating-fill" style="width: 33%;"></div>
+                        </div>
+                        <div class="rating-count">3</div>
+                    </div>
+                </div>
+
+                <div class="personality-badge badge">📚 Balanced Judge</div>
+                <p class="subtitle" style="text-align: center;">Your ratings match the Goodreads community perfectly (-0.01)</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: Author Diversity -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Author Explorer</h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Unique Authors</div>
+                        <div class="stat-value">20</div>
+                        <div class="stat-desc">Out of 20 books</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Books per Author</div>
+                        <div class="stat-value">1.0</div>
+                        <div class="stat-desc">Perfect diversity</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Your Style</div>
+                        <div class="stat-value">Explorer</div>
+                        <div class="stat-desc">Every book = new voice</div>
+                    </div>
+                </div>
+
+                <div class="quote">
+                    "Twenty books, twenty different authors. You're a true literary explorer who refuses to repeat."
+                </div>
+
+                <div class="personality-badge badge">🗺️ Explorer</div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Time Span -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Your Reading Journey</h2>
+                <p class="subtitle">Spanning 395 years of literature</p>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Oldest Book</div>
+                        <div class="stat-value">1630</div>
+                        <div class="stat-desc">The Bruised Reed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Year</div>
+                        <div class="stat-value">1986</div>
+                        <div class="stat-desc">Modern focus</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Recent Books</div>
+                        <div class="stat-value">6</div>
+                        <div class="stat-desc">Published 2020+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Era Breakdown -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Your Reading Timeline</h2>
+                <p class="subtitle">Books across the centuries</p>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">Early Modern</div>
+                        <div class="timeline-bar" style="width: 8%;"></div>
+                        <div class="timeline-count">1</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">20th Century</div>
+                        <div class="timeline-bar" style="width: 17%;"></div>
+                        <div class="timeline-count">2</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">21st Century</div>
+                        <div class="timeline-bar" style="width: 100%;"></div>
+                        <div class="timeline-count">12</div>
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Favorite Era</div>
+                        <div class="stat-value">21st Century</div>
+                        <div class="stat-desc">60% of your reading</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Reading Style</div>
+                        <div class="stat-value">Balanced</div>
+                        <div class="stat-desc">Mix of classic & modern</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Genre Breakdown -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Your Eclectic Tastes</h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Most Read Genre</div>
+                        <div class="stat-value">Fiction</div>
+                        <div class="stat-desc">7 books (35%)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Genre Diversity</div>
+                        <div class="stat-value">5 Genres</div>
+                        <div class="stat-desc">Wide-ranging interests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Second Place</div>
+                        <div class="stat-value">Theology</div>
+                        <div class="stat-desc">5 books</div>
+                    </div>
+                </div>
+
+                <div class="quote">
+                    "From Holocaust memoirs to pregnancy guides, from ancient wisdom to modern self-help—you read fearlessly across boundaries."
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <span class="badge">Fiction: 7</span>
+                    <span class="badge">Theology: 5</span>
+                    <span class="badge">Self-Help/Practical: 4</span>
+                    <span class="badge">History: 2</span>
+                    <span class="badge">Romance: 2</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Special Achievements -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Your Superpowers</h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Perfect Diversity</div>
+                        <div class="stat-value">100%</div>
+                        <div class="stat-desc">Every single book from a different author—ultimate exploration</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Taste Alignment</div>
+                        <div class="stat-value">Mainstream</div>
+                        <div class="stat-desc">Your ratings perfectly match the community (-0.01)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Quality Selector</div>
+                        <div class="stat-value">84%</div>
+                        <div class="stat-desc">Rated 4+ stars—you have great taste</div>
+                    </div>
+                </div>
+
+                <div class="quote">
+                    "Twenty authors, five genres, four centuries. You don't just read—you explore."
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Final Message -->
+        <div class="slide">
+            <div class="slide-content" style="text-align: center;">
+                <h2>2025 by the Numbers</h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Books Read</div>
+                        <div class="stat-value">20</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Authors Discovered</div>
+                        <div class="stat-value">20</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Years Covered</div>
+                        <div class="stat-value">395</div>
+                    </div>
+                </div>
+
+                <div class="quote" style="margin-top: 3rem;">
+                    "Here's to another year of discovering new voices, exploring diverse perspectives, and finding wisdom wherever it lives."
+                </div>
+
+                <h1 style="margin-top: 2rem; font-size: clamp(2rem, 6vw, 5rem);">2026 AWAITS</h1>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
