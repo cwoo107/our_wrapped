@@ -871,3 +871,37 @@ h3 {
         margin-top: 0.3rem;
     }
 }
+/* Goodreads Link Styling */
+.instructions a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    position: relative;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.instructions a:hover {
+    filter: brightness(1.2);
+}
+
+.instructions a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.instructions a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}

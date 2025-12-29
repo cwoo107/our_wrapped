@@ -21,7 +21,7 @@ const LandingPage = ({ onGetStarted }) => {
                 <div className="instructions">
                     <h3>How it works:</h3>
                     <ol>
-                        <li>Export your Goodreads library (Library → Import/Export → Export Library)</li>
+                        <li><a href="https://www.goodreads.com/review/import">Export your Goodreads library (Library → Import/Export → Export Library)</a></li>
                         <li>Upload your CSV or Excel file</li>
                         <li>Get your personalized Reading Wrapped!</li>
                     </ol>
