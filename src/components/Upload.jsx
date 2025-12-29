@@ -125,12 +125,12 @@ const Upload = ({ onComplete }) => {
                         )}
 
                         <div className="upload-tips">
-                            <h3>Tips:</h3>
-                            <ul>
-                                <li>Export your Goodreads library: Library → Import/Export → Export Library</li>
-                                <li>Make sure your file includes "Date Read" for books you've finished</li>
-                                <li>Both CSV and Excel formats (.xlsx, .xls) are supported</li>
-                            </ul>
+                            <h3>How it works:</h3>
+                            <ol>
+                                <li><a href="https://www.goodreads.com/review/import">Export your Goodreads library (Select Export Library, then download the file)</a></li>
+                                <li>Upload your CSV or Excel file</li>
+                                <li>Get your personalized Reading Wrapped!</li>
+                            </ol>
                         </div>
                     </>
                 ) : (
