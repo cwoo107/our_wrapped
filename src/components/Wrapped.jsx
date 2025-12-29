@@ -3,7 +3,6 @@ import { filterBooksByYear } from '../utils/parseData';
 import { calculateStats } from '../utils/calculateStats';
 
 const Wrapped = ({ stats: initialStats, allBooks, availableYears, colorScheme = 'default' }) => {
-    const [currentSlide, setCurrentSlide] = useState(0);
     const [stats, setStats] = useState(initialStats);
     const [selectedYear, setSelectedYear] = useState(initialStats.year);
     const [showYearSelector, setShowYearSelector] = useState(false);
