@@ -134,8 +134,19 @@ const Wrapped = ({ stats: initialStats, allBooks, availableYears, colorScheme = 
                 <div className="slide">
                     <div className="slide-content">
                         <h2>Your Year in Books</h2>
-                        <div className="big-number">{stats.totalBooks}</div>
-                        <h3>Books Read</h3>
+
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4rem', flexWrap: 'wrap', margin: '2rem 0' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div className="big-number">{stats.totalBooks}</div>
+                                <h3>Books Read</h3>
+                            </div>
+                            {stats.totalPages > 0 && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <div className="med-number">{stats.totalPages.toLocaleString()}</div>
+                                    <h3>Pages Read</h3>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="stat-grid">
                             {stats.avgRating && (
@@ -165,6 +176,13 @@ const Wrapped = ({ stats: initialStats, allBooks, availableYears, colorScheme = 
                                     <div className="stat-desc">
                                         {stats.fourPlusPct > 80 ? 'Nearly everything was great' : 'Quality reading'}
                                     </div>
+                                </div>
+                            )}
+                            {stats.totalPages > 0 && (
+                                <div className="stat-card">
+                                    <div className="stat-label">Average Book Length</div>
+                                    <div className="stat-value">{Math.round(stats.totalPages / stats.totalBooks)}</div>
+                                    <div className="stat-desc">Pages per book</div>
                                 </div>
                             )}
                         </div>
@@ -209,6 +227,120 @@ const Wrapped = ({ stats: initialStats, allBooks, availableYears, colorScheme = 
                                     </p>
                                 </>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {/* NEW SLIDE: Rating Insights */}
+                {stats.ratingAnalysis && stats.ratingAnalysis.ratedHigherPct !== undefined && (
+                    <div className="slide">
+                        <div className="slide-content">
+                            <h2>Your Rating Style</h2>
+                            <p className="subtitle">How you compare to the crowd</p>
+
+                            <div className="stat-grid">
+                                <div className="stat-card">
+                                    <div className="stat-label">Rate Higher</div>
+                                    <div className="stat-value">{stats.ratingAnalysis.ratedHigherPct}%</div>
+                                    <div className="stat-desc">{stats.ratingAnalysis.ratedHigherCount} books rated above average</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-label">Rate Lower</div>
+                                    <div className="stat-value">{stats.ratingAnalysis.ratedLowerPct}%</div>
+                                    <div className="stat-desc">{stats.ratingAnalysis.ratedLowerCount} books rated below average</div>
+                                </div>
+                                <div className="stat-card">
+                                    <div className="stat-label">Consistency</div>
+                                    <div className="stat-value">{stats.ratingAnalysis.consistencyType}</div>
+                                    <div className="stat-desc">Your rating pattern</div>
+                                </div>
+                            </div>
+
+                            {stats.ratingAnalysis.underratedGems && stats.ratingAnalysis.underratedGems.length > 0 && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <h3>Your Hidden Gems 💎</h3>
+                                    <p className="subtitle">Books you loved that others overlooked</p>
+                                    <div className="book-list">
+                                        {stats.ratingAnalysis.underratedGems.slice(0, 3).map((book, idx) => (
+                                            <div key={idx} className="book-item">
+                                                <div className="book-title">{book.title}</div>
+                                                <div className="book-rating">You: ⭐⭐⭐⭐⭐ | Community: {book.avgRating.toFixed(1)} ⭐</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {stats.ratingAnalysis.mostLoved && stats.ratingAnalysis.mostLoved.length > 0 && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <h3>Your Biggest Loves ❤️</h3>
+                                    <p className="subtitle">Books you rated way higher than everyone else</p>
+                                    <div className="book-list">
+                                        {stats.ratingAnalysis.mostLoved.map((book, idx) => (
+                                            <div key={idx} className="book-item">
+                                                <div className="book-title">{book.title}</div>
+                                                <div className="book-rating">
+                                                    You: {book.userRating} ⭐ | Community: {book.avgRating.toFixed(1)} ⭐
+                                                    <span className="diff-badge positive">+{book.difference.toFixed(1)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {stats.ratingAnalysis.harshOnPopular && (
+                                <div className="personality-badge badge">🎯 Harsh on Hype</div>
+                            )}
+                            {stats.ratingAnalysis.championOfUnderdogs && (
+                                <div className="personality-badge badge">🦸 Champion of Underdogs</div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* NEW SLIDE: Rating Disagreements */}
+                {stats.ratingAnalysis && stats.ratingAnalysis.mostCritical && stats.ratingAnalysis.mostCritical.length > 0 && (
+                    <div className="slide">
+                        <div className="slide-content">
+                            <h2>Hot Takes 🔥</h2>
+                            <p className="subtitle">Where you disagreed with the masses</p>
+
+                            <div style={{ marginTop: '2rem' }}>
+                                <h3>Books You Weren't Impressed By</h3>
+                                <div className="book-list">
+                                    {stats.ratingAnalysis.mostCritical.map((book, idx) => (
+                                        <div key={idx} className="book-item">
+                                            <div className="book-title">{book.title}</div>
+                                            <div className="book-rating">
+                                                You: {book.userRating} ⭐ | Community: {book.avgRating.toFixed(1)} ⭐
+                                                <span className="diff-badge negative">{book.difference.toFixed(1)}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {stats.ratingAnalysis.overratedBooks && stats.ratingAnalysis.overratedBooks.length > 0 && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <h3>Overrated Classics? 🤔</h3>
+                                    <p className="subtitle">Popular books that didn't work for you</p>
+                                    <div className="book-list">
+                                        {stats.ratingAnalysis.overratedBooks.map((book, idx) => (
+                                            <div key={idx} className="book-item">
+                                                <div className="book-title">{book.title}</div>
+                                                <div className="book-rating">
+                                                    You: {book.userRating} ⭐ | Community: {book.avgRating.toFixed(1)} ⭐
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="quote" style={{ marginTop: '2rem' }}>
+                                "Sometimes the best opinions are the unpopular ones."
+                            </div>
                         </div>
                     </div>
                 )}

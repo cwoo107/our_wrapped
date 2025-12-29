@@ -59,7 +59,8 @@ const parseGoodreadsData = (data) => {
             dateRead: getField('date read') || getField('date   read') || '',
             datePublished: getField('original publication year') || getField('date pub') || '',
             isbn: getField('isbn') || getField('isbn13') || '',
-            shelves: getField('bookshelves') || getField('shelves') || ''
+            shelves: getField('bookshelves') || getField('shelves') || '',
+            pages: getField('number of pages') || getField('pages') || 0
         };
     });
 };
@@ -110,9 +111,18 @@ export const filterBooksByYear = (books, year) => {
 export const parseRating = (ratingStr) => {
     if (!ratingStr) return null;
 
-    const str = String(ratingStr);
+    const str = String(ratingStr).trim();
 
-    // Look for bracketed rating (actual rating given)
+    // Handle empty or zero ratings
+    if (str === '' || str === '0') return null;
+
+    // First try: direct number (most common in Goodreads exports)
+    const directNumber = parseInt(str);
+    if (!isNaN(directNumber) && directNumber >= 1 && directNumber <= 5) {
+        return directNumber;
+    }
+
+    // Look for bracketed rating (older format)
     const bracketMatch = str.match(/\[\s*(\d)\s*of 5 stars\s*\]/);
     if (bracketMatch) return parseInt(bracketMatch[1]);
 
@@ -120,7 +130,7 @@ export const parseRating = (ratingStr) => {
     const starMatch = str.match(/(\d)\s*of 5 stars/);
     if (starMatch) return parseInt(starMatch[1]);
 
-    // Text ratings
+    // Text ratings (fallback)
     const textRatings = {
         'it was amazing': 5,
         'really liked it': 4,

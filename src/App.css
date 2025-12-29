@@ -370,6 +370,20 @@ h3 {
     animation: glow 2s ease-in-out infinite alternate;
 }
 
+.med-number {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 7.5vw, 6rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--primary), var(--purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    display: inline-block;
+    margin: 0.5rem 0;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
 @keyframes glow {
     from {
         filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.5));
@@ -778,5 +792,82 @@ h3 {
 
     .year-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}
+
+/* Book Lists for Rating Insights */
+.book-list {
+    margin: 1.5rem 0;
+}
+
+.book-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--accent);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.book-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.book-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--light);
+}
+
+.book-rating {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.diff-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+.diff-badge.positive {
+    background: rgba(46, 196, 182, 0.3);
+    color: var(--teal);
+    border: 1px solid var(--teal);
+}
+
+.diff-badge.negative {
+    background: rgba(255, 107, 53, 0.3);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+@media (max-width: 768px) {
+    .book-item {
+        padding: 0.8rem 1rem;
+    }
+
+    .book-title {
+        font-size: 1rem;
+    }
+
+    .book-rating {
+        font-size: 0.85rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .diff-badge {
+        margin-left: 0;
+        margin-top: 0.3rem;
     }
 }

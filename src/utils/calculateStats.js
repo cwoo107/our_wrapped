@@ -7,6 +7,15 @@ export const calculateStats = (books, userName = 'Reader', year = null) => {
         totalBooks: books.length
     };
 
+    const pagesRead = books
+        .map(b => {
+            const pages = parseInt(b.pages || b['Number of Pages'] || 0);
+            return isNaN(pages) ? 0 : pages;
+        })
+        .reduce((sum, pages) => sum + pages, 0);
+
+    stats.totalPages = pagesRead;
+
     // Parse all ratings
     const ratings = books.map(b => parseRating(b.rating)).filter(r => r !== null);
 
@@ -38,6 +47,9 @@ export const calculateStats = (books, userName = 'Reader', year = null) => {
             } else {
                 stats.ratingPersonality = "Balanced Judge";
             }
+
+            // NEW: Advanced rating analysis
+            stats.ratingAnalysis = analyzeRatingBehavior(validComparisons);
         }
     }
 
@@ -124,6 +136,116 @@ export const calculateStats = (books, userName = 'Reader', year = null) => {
     }
 
     return stats;
+};
+
+// NEW: Analyze rating behavior in detail
+const analyzeRatingBehavior = (booksWithComparisons) => {
+    const analysis = {};
+
+    // Books where user rated higher than Goodreads
+    const ratedHigher = booksWithComparisons.filter(b => {
+        const userRating = parseRating(b.rating);
+        return userRating > b.avgRating;
+    });
+
+    // Books where user rated lower than Goodreads
+    const ratedLower = booksWithComparisons.filter(b => {
+        const userRating = parseRating(b.rating);
+        return userRating < b.avgRating;
+    });
+
+    // Books rated exactly the same
+    const ratedSame = booksWithComparisons.filter(b => {
+        const userRating = parseRating(b.rating);
+        return Math.abs(userRating - b.avgRating) < 0.1;
+    });
+
+    analysis.ratedHigherCount = ratedHigher.length;
+    analysis.ratedLowerCount = ratedLower.length;
+    analysis.ratedSameCount = ratedSame.length;
+    analysis.ratedHigherPct = parseFloat((ratedHigher.length / booksWithComparisons.length * 100).toFixed(1));
+    analysis.ratedLowerPct = parseFloat((ratedLower.length / booksWithComparisons.length * 100).toFixed(1));
+
+    // Find biggest disagreements
+    const disagreements = booksWithComparisons.map(b => ({
+        title: b.title,
+        userRating: parseRating(b.rating),
+        avgRating: b.avgRating,
+        difference: parseRating(b.rating) - b.avgRating
+    }));
+
+    // Most loved (rated much higher than average)
+    const mostLoved = disagreements
+        .filter(d => d.difference > 0)
+        .sort((a, b) => b.difference - a.difference)
+        .slice(0, 3);
+
+    // Most critical (rated much lower than average)
+    const mostCritical = disagreements
+        .filter(d => d.difference < 0)
+        .sort((a, b) => a.difference - b.difference)
+        .slice(0, 3);
+
+    analysis.mostLoved = mostLoved;
+    analysis.mostCritical = mostCritical;
+
+    // Underrated gems (gave 5 stars, Goodreads average < 4.0)
+    const underratedGems = booksWithComparisons.filter(b => {
+        const userRating = parseRating(b.rating);
+        return userRating === 5 && b.avgRating < 4.0;
+    });
+
+    analysis.underratedGems = underratedGems.map(b => ({
+        title: b.title,
+        avgRating: b.avgRating
+    }));
+
+    // Overrated books (gave 1-2 stars, Goodreads average > 4.0)
+    const overratedBooks = booksWithComparisons.filter(b => {
+        const userRating = parseRating(b.rating);
+        return userRating <= 2 && b.avgRating > 4.0;
+    });
+
+    analysis.overratedBooks = overratedBooks.map(b => ({
+        title: b.title,
+        avgRating: b.avgRating,
+        userRating: parseRating(b.rating)
+    }));
+
+    // Rating consistency - standard deviation
+    const differences = disagreements.map(d => d.difference);
+    const avgDiff = differences.reduce((a, b) => a + b, 0) / differences.length;
+    const variance = differences.reduce((sum, diff) => sum + Math.pow(diff - avgDiff, 2), 0) / differences.length;
+    analysis.ratingStdDev = parseFloat(Math.sqrt(variance).toFixed(2));
+
+    // Determine consistency personality
+    if (analysis.ratingStdDev < 0.5) {
+        analysis.consistencyType = "Predictable";
+    } else if (analysis.ratingStdDev > 1.0) {
+        analysis.consistencyType = "Unpredictable";
+    } else {
+        analysis.consistencyType = "Moderate";
+    }
+
+    // Harsh on popular books?
+    const popularBooks = booksWithComparisons.filter(b => b.avgRating >= 4.2);
+    if (popularBooks.length > 0) {
+        const popularAvgDiff = popularBooks.reduce((sum, b) => {
+            return sum + (parseRating(b.rating) - b.avgRating);
+        }, 0) / popularBooks.length;
+        analysis.harshOnPopular = popularAvgDiff < -0.3;
+    }
+
+    // Champion of underdogs?
+    const unpopularBooks = booksWithComparisons.filter(b => b.avgRating < 3.8);
+    if (unpopularBooks.length > 0) {
+        const unpopularAvgDiff = unpopularBooks.reduce((sum, b) => {
+            return sum + (parseRating(b.rating) - b.avgRating);
+        }, 0) / unpopularBooks.length;
+        analysis.championOfUnderdogs = unpopularAvgDiff > 0.3;
+    }
+
+    return analysis;
 };
 
 const getMostCommon = (arr) => {
