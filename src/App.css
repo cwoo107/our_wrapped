@@ -872,7 +872,7 @@ h3 {
     }
 }
 /* Goodreads Link Styling */
-.instructions a {
+a {
     color: var(--accent);
     text-decoration: none;
     font-weight: 700;
@@ -884,11 +884,11 @@ h3 {
     -webkit-text-fill-color: transparent;
 }
 
-.instructions a:hover {
+a:hover {
     filter: brightness(1.2);
 }
 
-.instructions a::after {
+a::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -901,7 +901,7 @@ h3 {
     transition: transform 0.3s ease;
 }
 
-.instructions a:hover::after {
+a:hover::after {
     transform: scaleX(1);
     transform-origin: left;
 }
